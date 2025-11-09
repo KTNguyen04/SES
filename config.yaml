@@ -1,0 +1,46 @@
+processes:
+  - id: 0
+    host: 127.0.0.1
+    port: 9001
+  - id: 1
+    host: 127.0.0.1
+    port: 9001
+  - id: 2
+    host: 127.0.0.1
+    port: 9002
+  - id: 3
+    host: 127.0.0.1
+    port: 9003
+  - id: 4
+    host: 127.0.0.1
+    port: 9004
+  - id: 5
+    host: 127.0.0.1
+    port: 9005
+  - id: 6
+    host: 127.0.0.1
+    port: 9006
+  - id: 7
+    host: 127.0.0.1
+    port: 9007
+  - id: 8
+    host: 127.0.0.1
+    port: 9008
+  - id: 9
+    host: 127.0.0.1
+    port: 9009
+  - id: 10
+    host: 127.0.0.1
+    port: 9010
+  - id: 11
+    host: 127.0.0.1
+    port: 9011
+  - id: 12
+    host: 127.0.0.1
+    port: 9012
+  - id: 13
+    host: 127.0.0.1
+    port: 9013
+  - id: 14
+    host: 127.0.0.1
+    port: 9014

@@ -1,0 +1,18 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option go_package = "github.com/KTNguyen04/SES/comm";
+
+service Communication {
+  rpc Comm(stream Message) returns (stream Message);
+  rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+message Message {
+  string from = 1;
+  string to = 2;
+  string content = 3;
+  vvector vvt = 4;
+}
+
+message vector { repeated int64 t = 1; }
+message vvector { repeated vector v = 1; }
