@@ -4,13 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"sync"
 
-	ses "github.com/KTNguyen04/SES/internal/protocol"
+	"github.com/KTNguyen04/SES/internal/p2p"
 	"github.com/spf13/viper"
 )
 
 var (
-	port = flag.Int("port", 9000, "Self port")
+	port = flag.String("port", "9000", "Self port")
 )
 
 func main() {
@@ -28,7 +29,7 @@ func main() {
 		Processes []struct {
 			Id   int    `mapstructure:"id"`
 			Host string `mapstructure:"host"`
-			Port int    `mapstructure:"port"`
+			Port string `mapstructure:"port"`
 		} `mapstructure:"processes"`
 	}
 
@@ -36,17 +37,36 @@ func main() {
 		log.Fatal(err)
 	}
 
-	host := ses.NewHost(-1, "127.0.0.1", *port)
+	host := p2p.NewHost(-1, "127.0.0.1", *port)
+	knownPeers := []p2p.Peer{}
 
-	peers := &ses.Peers{}
 	for _, p := range cfg.Processes {
 		if p.Port == *port {
 			host.Id = p.Id
 			continue
 		}
-		peers.AddPeer(p.Id, p.Host, p.Port)
+		knownPeers = append(knownPeers, p2p.Peer{
+			Id:      p.Id,
+			Address: p.Host,
+			Port:    p.Port,
+		})
 	}
-	fmt.Printf("%v", peers.Peers)
+	fmt.Printf("%v", knownPeers)
 	fmt.Printf("Self: %v\n", host)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		host.RunServer()
+	}()
+
+	for _, peer := range knownPeers {
+		host.DialToPeer(peer.Address, peer.Port)
+		host.Inform(peer.Address, peer.Port)
+	}
+	defer host.ClosePeerConnection()
+	wg.Wait()
 
 }
