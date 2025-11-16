@@ -3,8 +3,9 @@ import "google/protobuf/empty.proto";
 option go_package = "github.com/KTNguyen04/SES/comm";
 
 service Communication {
-  rpc Comm(stream Message) returns (stream Message);
+  rpc Send(Message) returns (google.protobuf.Empty);
   rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc Disconnect(Request) returns (google.protobuf.Empty);
 }
 
 message Message {
@@ -13,6 +14,7 @@ message Message {
   string content = 3;
   vvector vvt = 4;
 }
+message Request { string id = 1; }
 
 message vector { repeated int64 t = 1; }
 message vvector { repeated vector v = 1; }

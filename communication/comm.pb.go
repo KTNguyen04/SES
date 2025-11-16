@@ -90,6 +90,50 @@ func (x *Message) GetVvt() *Vvector {
 	return nil
 }
 
+type Request struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Request) Reset() {
+	*x = Request{}
+	mi := &file_communication_comm_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Request) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Request) ProtoMessage() {}
+
+func (x *Request) ProtoReflect() protoreflect.Message {
+	mi := &file_communication_comm_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Request.ProtoReflect.Descriptor instead.
+func (*Request) Descriptor() ([]byte, []int) {
+	return file_communication_comm_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Request) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 type Vector struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	T             []int64                `protobuf:"varint,1,rep,packed,name=t,proto3" json:"t,omitempty"`
@@ -99,7 +143,7 @@ type Vector struct {
 
 func (x *Vector) Reset() {
 	*x = Vector{}
-	mi := &file_communication_comm_proto_msgTypes[1]
+	mi := &file_communication_comm_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -111,7 +155,7 @@ func (x *Vector) String() string {
 func (*Vector) ProtoMessage() {}
 
 func (x *Vector) ProtoReflect() protoreflect.Message {
-	mi := &file_communication_comm_proto_msgTypes[1]
+	mi := &file_communication_comm_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -124,7 +168,7 @@ func (x *Vector) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Vector.ProtoReflect.Descriptor instead.
 func (*Vector) Descriptor() ([]byte, []int) {
-	return file_communication_comm_proto_rawDescGZIP(), []int{1}
+	return file_communication_comm_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Vector) GetT() []int64 {
@@ -143,7 +187,7 @@ type Vvector struct {
 
 func (x *Vvector) Reset() {
 	*x = Vvector{}
-	mi := &file_communication_comm_proto_msgTypes[2]
+	mi := &file_communication_comm_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -155,7 +199,7 @@ func (x *Vvector) String() string {
 func (*Vvector) ProtoMessage() {}
 
 func (x *Vvector) ProtoReflect() protoreflect.Message {
-	mi := &file_communication_comm_proto_msgTypes[2]
+	mi := &file_communication_comm_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -168,7 +212,7 @@ func (x *Vvector) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Vvector.ProtoReflect.Descriptor instead.
 func (*Vvector) Descriptor() ([]byte, []int) {
-	return file_communication_comm_proto_rawDescGZIP(), []int{2}
+	return file_communication_comm_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Vvector) GetV() []*Vector {
@@ -187,14 +231,18 @@ const file_communication_comm_proto_rawDesc = "" +
 	"\x04from\x18\x01 \x01(\tR\x04from\x12\x0e\n" +
 	"\x02to\x18\x02 \x01(\tR\x02to\x12\x18\n" +
 	"\acontent\x18\x03 \x01(\tR\acontent\x12\x1a\n" +
-	"\x03vvt\x18\x04 \x01(\v2\b.vvectorR\x03vvt\"\x16\n" +
+	"\x03vvt\x18\x04 \x01(\v2\b.vvectorR\x03vvt\"\x19\n" +
+	"\aRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x16\n" +
 	"\x06vector\x12\f\n" +
 	"\x01t\x18\x01 \x03(\x03R\x01t\" \n" +
 	"\avvector\x12\x15\n" +
-	"\x01v\x18\x01 \x03(\v2\a.vectorR\x01v2g\n" +
-	"\rCommunication\x12\x1e\n" +
-	"\x04Comm\x12\b.Message\x1a\b.Message(\x010\x01\x126\n" +
-	"\x04Ping\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.EmptyB Z\x1egithub.com/KTNguyen04/SES/commb\x06proto3"
+	"\x01v\x18\x01 \x03(\v2\a.vectorR\x01v2\xa1\x01\n" +
+	"\rCommunication\x12(\n" +
+	"\x04Send\x12\b.Message\x1a\x16.google.protobuf.Empty\x126\n" +
+	"\x04Ping\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12.\n" +
+	"\n" +
+	"Disconnect\x12\b.Request\x1a\x16.google.protobuf.EmptyB Z\x1egithub.com/KTNguyen04/SES/commb\x06proto3"
 
 var (
 	file_communication_comm_proto_rawDescOnce sync.Once
@@ -208,22 +256,25 @@ func file_communication_comm_proto_rawDescGZIP() []byte {
 	return file_communication_comm_proto_rawDescData
 }
 
-var file_communication_comm_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_communication_comm_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_communication_comm_proto_goTypes = []any{
 	(*Message)(nil),       // 0: Message
-	(*Vector)(nil),        // 1: vector
-	(*Vvector)(nil),       // 2: vvector
-	(*emptypb.Empty)(nil), // 3: google.protobuf.Empty
+	(*Request)(nil),       // 1: Request
+	(*Vector)(nil),        // 2: vector
+	(*Vvector)(nil),       // 3: vvector
+	(*emptypb.Empty)(nil), // 4: google.protobuf.Empty
 }
 var file_communication_comm_proto_depIdxs = []int32{
-	2, // 0: Message.vvt:type_name -> vvector
-	1, // 1: vvector.v:type_name -> vector
-	0, // 2: Communication.Comm:input_type -> Message
-	3, // 3: Communication.Ping:input_type -> google.protobuf.Empty
-	0, // 4: Communication.Comm:output_type -> Message
-	3, // 5: Communication.Ping:output_type -> google.protobuf.Empty
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
+	3, // 0: Message.vvt:type_name -> vvector
+	2, // 1: vvector.v:type_name -> vector
+	0, // 2: Communication.Send:input_type -> Message
+	4, // 3: Communication.Ping:input_type -> google.protobuf.Empty
+	1, // 4: Communication.Disconnect:input_type -> Request
+	4, // 5: Communication.Send:output_type -> google.protobuf.Empty
+	4, // 6: Communication.Ping:output_type -> google.protobuf.Empty
+	4, // 7: Communication.Disconnect:output_type -> google.protobuf.Empty
+	5, // [5:8] is the sub-list for method output_type
+	2, // [2:5] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name
@@ -240,7 +291,7 @@ func file_communication_comm_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_communication_comm_proto_rawDesc), len(file_communication_comm_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

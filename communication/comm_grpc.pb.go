@@ -20,16 +20,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Communication_Comm_FullMethodName = "/Communication/Comm"
-	Communication_Ping_FullMethodName = "/Communication/Ping"
+	Communication_Send_FullMethodName       = "/Communication/Send"
+	Communication_Ping_FullMethodName       = "/Communication/Ping"
+	Communication_Disconnect_FullMethodName = "/Communication/Disconnect"
 )
 
 // CommunicationClient is the client API for Communication service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CommunicationClient interface {
-	Comm(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Message, Message], error)
+	Send(ctx context.Context, in *Message, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	Ping(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Disconnect(ctx context.Context, in *Request, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type communicationClient struct {
@@ -40,18 +42,15 @@ func NewCommunicationClient(cc grpc.ClientConnInterface) CommunicationClient {
 	return &communicationClient{cc}
 }
 
-func (c *communicationClient) Comm(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Message, Message], error) {
+func (c *communicationClient) Send(ctx context.Context, in *Message, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Communication_ServiceDesc.Streams[0], Communication_Comm_FullMethodName, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, Communication_Send_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[Message, Message]{ClientStream: stream}
-	return x, nil
+	return out, nil
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Communication_CommClient = grpc.BidiStreamingClient[Message, Message]
 
 func (c *communicationClient) Ping(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -63,12 +62,23 @@ func (c *communicationClient) Ping(ctx context.Context, in *emptypb.Empty, opts 
 	return out, nil
 }
 
+func (c *communicationClient) Disconnect(ctx context.Context, in *Request, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, Communication_Disconnect_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommunicationServer is the server API for Communication service.
 // All implementations must embed UnimplementedCommunicationServer
 // for forward compatibility.
 type CommunicationServer interface {
-	Comm(grpc.BidiStreamingServer[Message, Message]) error
+	Send(context.Context, *Message) (*emptypb.Empty, error)
 	Ping(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
+	Disconnect(context.Context, *Request) (*emptypb.Empty, error)
 	mustEmbedUnimplementedCommunicationServer()
 }
 
@@ -79,11 +89,14 @@ type CommunicationServer interface {
 // pointer dereference when methods are called.
 type UnimplementedCommunicationServer struct{}
 
-func (UnimplementedCommunicationServer) Comm(grpc.BidiStreamingServer[Message, Message]) error {
-	return status.Errorf(codes.Unimplemented, "method Comm not implemented")
+func (UnimplementedCommunicationServer) Send(context.Context, *Message) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
 }
 func (UnimplementedCommunicationServer) Ping(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+}
+func (UnimplementedCommunicationServer) Disconnect(context.Context, *Request) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Disconnect not implemented")
 }
 func (UnimplementedCommunicationServer) mustEmbedUnimplementedCommunicationServer() {}
 func (UnimplementedCommunicationServer) testEmbeddedByValue()                       {}
@@ -106,12 +119,23 @@ func RegisterCommunicationServer(s grpc.ServiceRegistrar, srv CommunicationServe
 	s.RegisterService(&Communication_ServiceDesc, srv)
 }
 
-func _Communication_Comm_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(CommunicationServer).Comm(&grpc.GenericServerStream[Message, Message]{ServerStream: stream})
+func _Communication_Send_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Message)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommunicationServer).Send(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Communication_Send_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommunicationServer).Send(ctx, req.(*Message))
+	}
+	return interceptor(ctx, in, info, handler)
 }
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Communication_CommServer = grpc.BidiStreamingServer[Message, Message]
 
 func _Communication_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
@@ -131,6 +155,24 @@ func _Communication_Ping_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Communication_Disconnect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommunicationServer).Disconnect(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Communication_Disconnect_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommunicationServer).Disconnect(ctx, req.(*Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Communication_ServiceDesc is the grpc.ServiceDesc for Communication service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,17 +181,18 @@ var Communication_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*CommunicationServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Send",
+			Handler:    _Communication_Send_Handler,
+		},
+		{
 			MethodName: "Ping",
 			Handler:    _Communication_Ping_Handler,
 		},
-	},
-	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Comm",
-			Handler:       _Communication_Comm_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
+			MethodName: "Disconnect",
+			Handler:    _Communication_Disconnect_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "communication/comm.proto",
 }
