@@ -8,10 +8,8 @@ SES protocol in Distributed System
 
 # Demo video
 
-- Video URL: https://youtu.be/MCqRplibov4
-- [![Open on youtube](https://img.youtube.com/vi/MCqRplibov4/0.jpg)](https://www.youtube.com/watch?v=MCqRplibov4)
-
-# Prerequisites
+- Video URL: https://youtu.be/rHwjPpX2-bk
+- [![Open on youtube](https://img.youtube.com/vi/rHwjPpX2-bk/0.jpg)](https://www.youtube.com/watch?v=rHwjPpX2-bk)
 
 # Prerequisites
 

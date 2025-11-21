@@ -147,6 +147,7 @@ func (host *Host) checkBufferedMessages() {
 	newBuf := host.BufferedMessages[:0]
 	for _, msg := range host.BufferedMessages {
 		if host.checkCanDeliver(msg) {
+			log.Printf("deliver buffered message from peer %s: %s", msg.From, msg.Content)
 			host.deliver(msg)
 		} else {
 			newBuf = append(newBuf, msg)
