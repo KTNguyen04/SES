@@ -87,7 +87,10 @@ func (host *Host) Send(ctx context.Context, msg *comm.Message) (*emptypb.Empty, 
 		log.Printf("invalid peer id in message: %v", err)
 		return nil, status.Errorf(codes.InvalidArgument, "invalid peer id in message")
 	}
+
+	host.mu.Lock()
 	host.Vvt.V[host.Id].T[host.Id]++
+	host.mu.Unlock()
 	canDeliver := host.checkCanDeliver(msg)
 
 	if canDeliver {
@@ -95,15 +98,19 @@ func (host *Host) Send(ctx context.Context, msg *comm.Message) (*emptypb.Empty, 
 		host.checkBufferedMessages()
 		host.mergeVvector(msg.Vvt, peerId)
 	} else {
+		host.mu.Lock()
 		host.Vvt.V[host.Id].T[host.Id]--
 		host.BufferedMessages = append(host.BufferedMessages, msg)
 		log.Printf("Buffered message from peer %s: %s", msg.From, msg.Content)
+		host.mu.Unlock()
 	}
 
 	return &emptypb.Empty{}, nil
 }
 
 func (host *Host) checkCanDeliver(msg *comm.Message) bool {
+	host.mu.RLock()
+	defer host.mu.RUnlock()
 	log.Printf("--------------------------------\n")
 	log.Printf("Checking if can deliver message from peer %s: %s\n", msg.From, msg.Content)
 	log.Printf("Message Vvector:\n")
@@ -141,6 +148,8 @@ func (host *Host) deliver(msg *comm.Message) {
 }
 func (host *Host) checkBufferedMessages() {
 
+	host.mu.RLock()
+	defer host.mu.RUnlock()
 	if len(host.BufferedMessages) == 0 {
 		return
 	}
@@ -157,6 +166,8 @@ func (host *Host) checkBufferedMessages() {
 }
 
 func (host *Host) mergeVvector(msgVvt *comm.Vvector, peerId int) {
+	host.mu.Lock()
+	defer host.mu.Unlock()
 	log.Printf("--------------------------------\n")
 	log.Printf("Merging Vvectors after receiving message\n")
 	log.Printf("host Vvector before merge:\n")

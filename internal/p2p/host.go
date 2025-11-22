@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 
 	comm "github.com/KTNguyen04/SES/communication"
 	"google.golang.org/grpc"
@@ -17,8 +18,9 @@ type Host struct {
 	SelfClientsToPeer                     map[int]comm.CommunicationClient
 	SelfConnsToPeer                       map[int]*grpc.ClientConn
 	ActivePeers                           []Peer
-	comm.UnimplementedCommunicationServer // implement interface
 	BufferedMessages                      []*comm.Message
+	mu                                    sync.RWMutex
+	comm.UnimplementedCommunicationServer // implement interface
 }
 
 type Peer struct {
@@ -39,6 +41,8 @@ func NewHost(id int, addr string, port string) *Host {
 }
 
 func (host *Host) IfConnectedToPeer(peer Peer) bool {
+	host.mu.RLock()
+	defer host.mu.RUnlock()
 	if _, ok := host.SelfConnsToPeer[peer.Id]; ok {
 		return true
 	}
@@ -51,7 +55,9 @@ func (host *Host) SESSendMessage(to int, content string) error {
 		return fmt.Errorf("not connected to peer %d yet", to)
 	}
 
+	host.mu.Lock()
 	host.Vvt.V[host.Id].T[host.Id]++
+	host.mu.Unlock()
 
 	_, err := host.SelfClientsToPeer[to].Send(context.Background(), &comm.Message{
 		From:    fmt.Sprintf("%d", host.Id),
@@ -63,6 +69,7 @@ func (host *Host) SESSendMessage(to int, content string) error {
 		log.Printf("Failed to send message to peer %d: %v", to, err)
 		return err
 	}
+	host.mu.Lock()
 	log.Printf("Sent message to peer %d: %s", to, content)
 	log.Printf("host Vvector after sending message to %d:\n", to)
 	for i, v := range host.Vvt.V {
@@ -72,6 +79,9 @@ func (host *Host) SESSendMessage(to int, content string) error {
 		}
 		log.Println(line)
 	}
+	host.mu.Unlock()
+
+	host.mu.Lock()
 	if host.Vvt.V[to].T == nil {
 		host.Vvt.V[to].T = make([]int64, len(host.Vvt.V))
 		copy(host.Vvt.V[to].T, host.Vvt.V[host.Id].T)
@@ -82,6 +92,7 @@ func (host *Host) SESSendMessage(to int, content string) error {
 			}
 		}
 	}
+	host.mu.Unlock()
 
-	return err
+	return nil
 }
